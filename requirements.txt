@@ -1,5 +1,6 @@
 openai
 streamlit
+chromadb
 langchain
 langchain-community
 langchain-openai
@@ -9,3 +10,4 @@ python-dotenv
 jupyter
 ipykernel
 linkedin-api
+langchain_chroma
