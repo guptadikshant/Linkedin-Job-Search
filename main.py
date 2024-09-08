@@ -1,5 +1,3 @@
-import json
-import time
 import os
 from linkedin_api import Linkedin
 from dotenv import load_dotenv, find_dotenv
