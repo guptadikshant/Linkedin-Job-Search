@@ -6,16 +6,24 @@ load_dotenv(find_dotenv())
 
 # Authenticate using any Linkedin account credentials
 api = Linkedin(
-    username=os.environ["LINKEDIN_USERNAME"],
-    password=os.environ["LINKEDIN_PASSWORD"]
+    username=os.environ["LINKEDIN_USERNAME"], password=os.environ["LINKEDIN_PASSWORD"]
 )
 
 # GET a profile
 profile = api.get_profile(urn_id="ACoAAAZZciMBmlehJoR3zG5AnILlz_0LDgRmano")
 
+
 # profile_skills = api.get_profile_skills(public_id="dikshant-gupta-9a7083170")
 
 print(profile["skills"])
+
+
+def this_function(var: str):
+    if var:
+        print(f"Value of var is: {var}")
+    else:
+        print("var is not defined")
+
 
 # # with open("profile_response.json", "w") as file:
 # #     json.dump(profile, file)
