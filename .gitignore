@@ -4,3 +4,4 @@ venv/
 .vscode/
 *.json
 *database*/
+__pycache__/
