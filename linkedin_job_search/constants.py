@@ -1,0 +1,1 @@
+VECTOR_DATABASE_DIR = "./vector_database"
