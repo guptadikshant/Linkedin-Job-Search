@@ -1,12 +1,15 @@
 import os
 from typing import List
+
 import chromadb
 from chromadb.utils.embedding_functions.openai_embedding_function import (
     OpenAIEmbeddingFunction,
 )
 
 
-def load_data_into_chroma(persist_dir: str, collection_name: str, all_documents: List[List], logger):
+def load_data_into_chroma(
+    persist_dir: str, collection_name: str, all_documents: List[List], logger
+):
     try:
         logger.info("Loading data into chromadb.")
         # client creation
@@ -32,7 +35,34 @@ def load_data_into_chroma(persist_dir: str, collection_name: str, all_documents:
         logger.error(f"Error occurred in loading data into chroma. Error: {err}")
 
 
+def load_data_from_chroma(
+    persist_dir: str, collection_name: str, job_description, relevant_keywords, logger
+):
+    logger.info("Retrieving relevant documents")
+    client = chromadb.PersistentClient(path=persist_dir)
 
+    collection = client.get_collection(
+        name=collection_name,
+        embedding_function=OpenAIEmbeddingFunction(
+            api_key=os.environ["OPENAI_API_KEY"]
+        ),
+    )
 
-def load_data_from_chroma(persist_dir: str, collection_name: str):
-    pass
+    retrieved_documents = collection.query(
+        query_texts=job_description,
+        n_results=8,
+        include=["documents"],
+        where={
+            "$or": [
+                {relevant_keywords[0]: relevant_keywords[0]},
+                {relevant_keywords[1]: relevant_keywords[1]},
+                {relevant_keywords[2]: relevant_keywords[2]},
+                {relevant_keywords[3]: relevant_keywords[3]},
+                {relevant_keywords[4]: relevant_keywords[4]},
+            ]
+        },
+    )["documents"]
+
+    logger.info(f"Retrieved {len(retrieved_documents)} documents.")
+
+    return retrieved_documents

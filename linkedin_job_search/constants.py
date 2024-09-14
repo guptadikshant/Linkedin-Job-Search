@@ -1,1 +1,5 @@
 VECTOR_DATABASE_DIR = "./vector_database"
+GROQ_MODEL = "llama-3.1-70b-versatile"
+GROQ_MODEL_TEMPERATURE = 0
+GEMINI_MODEL = "gmini-1.5-flash"
+GOOGLE_MODEL_TEMPERATURE = 0
