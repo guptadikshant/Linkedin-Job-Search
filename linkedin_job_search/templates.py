@@ -12,15 +12,14 @@ Job Description: {job_description}
 """
 
 
-
 GET_CANDIDATES_PROMT_TEMPLATE = [
-        (
-            "system",
-            "Act as a HR of a company who is looking for some candidates to fill a job position",
-        ),
-        (
-            "ai",
-            """
+    (
+        "system",
+        "Act as a HR of a company who is looking for some candidates to fill a job position",
+    ),
+    (
+        "ai",
+        """
             You will be given a job description and some candidates profiles. You first need to analyse the\
             job description step-by-step. After that analyse each job profile. Once all these done\
             then you need to compare each job profile with the job description and then report out 3 potential\
@@ -32,12 +31,11 @@ GET_CANDIDATES_PROMT_TEMPLATE = [
             
             ***YOUR ANASWER SHOULD COMES FROM THE GIVEN JOB PROFILES ONLY AND NOTHING ELSE.***
             """,
-        ),
+    ),
+    (
+        "human",
         (
-            "human",
-            (
-                "Job Description: {job_description} \n\n Candidates Profiles: {candidate_profiles}"
-            ),
+            "Job Description: {job_description} \n\n Candidates Profiles: {candidate_profiles}"
         ),
-    ]
-
+    ),
+]

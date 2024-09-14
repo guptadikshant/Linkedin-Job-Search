@@ -1,5 +1,6 @@
-from collections import defaultdict
 import json
+from collections import defaultdict
+
 import pandas as pd
 from langchain_core.documents import Document
 
@@ -24,11 +25,11 @@ def create_people_profiles_skills(api, all_peoples_df: pd.DataFrame, logger):
                 continue
         logger.info("Successfully got all the people's profile and skills")
         return peoples_profiles
-    
+
     except Exception as err:
-        logger.error(f"Error occurred in getting people's profile and data. Error: {err}")
-
-
+        logger.error(
+            f"Error occurred in getting people's profile and data. Error: {err}"
+        )
 
 
 def data_cleanup(peoples_profiles: pd.DataFrame, logger):

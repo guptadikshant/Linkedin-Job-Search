@@ -6,7 +6,10 @@ import streamlit as st
 from dotenv import find_dotenv, load_dotenv
 from linkedin_api import Linkedin
 
-from linkedin_job_search.chains import extract_relevant_keywords, get_relevant_candiates_profiles
+from linkedin_job_search.chains import (
+    extract_relevant_keywords,
+    get_relevant_candiates_profiles,
+)
 from linkedin_job_search.constants import (
     GROQ_MODEL,
     GROQ_MODEL_TEMPERATURE,
@@ -104,40 +107,41 @@ def main():
                     st.session_state.data_loaded = True
                     st.success("Successfully added data into ChromaDB")
 
-    logger.info(f"Data loaded Session State: {st.session_state.data_loaded}")
-
     if st.session_state.data_loaded:
         job_desciption = st.text_area("Please enter the job description here....")
 
         get_data = st.button("Get Response")
 
         if job_desciption and get_data:
-            llm_model = LLMModel().get_groq_model(
-                model_name=GROQ_MODEL, temperature=GROQ_MODEL_TEMPERATURE, logger=logger
-            )
-            relevant_job_keywords = extract_relevant_keywords(
-                llm_model=llm_model, job_description=job_desciption, logger=logger
-            )
+            with st.spinner("Getting Relevant Job Profiles"):
+                llm_model = LLMModel().get_groq_model(
+                    model_name=GROQ_MODEL,
+                    temperature=GROQ_MODEL_TEMPERATURE,
+                    logger=logger,
+                )
+                relevant_job_keywords = extract_relevant_keywords(
+                    llm_model=llm_model, job_description=job_desciption, logger=logger
+                )
 
-            retrieved_relevant_docs = load_data_from_chroma(
-                persist_dir=VECTOR_DATABASE_DIR,
-                collection_name=st.session_state.collection_name,
-                job_description=job_desciption,
-                relevant_keywords=relevant_job_keywords,
-                logger=logger,
-            )
+                retrieved_relevant_docs = load_data_from_chroma(
+                    persist_dir=VECTOR_DATABASE_DIR,
+                    collection_name=st.session_state.collection_name,
+                    job_description=job_desciption,
+                    relevant_keywords=relevant_job_keywords,
+                    logger=logger,
+                )
 
-            job_profiles = get_relevant_candiates_profiles(
-                relevant_docs=retrieved_relevant_docs,
-                job_description=job_desciption,
-                llm_model=llm_model,
-                logger=logger
-            )
+                job_profiles = get_relevant_candiates_profiles(
+                    relevant_docs=retrieved_relevant_docs,
+                    job_description=job_desciption,
+                    llm_model=llm_model,
+                    logger=logger,
+                )
 
-            st.write(job_profiles)
+                st.write(job_profiles)
 
         # Button to reset the keyword and start a new search
-        if st.button("Enter new keyword"):
+        if st.button("Enter new job title"):
             st.session_state.data_loaded = False  # Reset the flag to allow a new search
             st.session_state.search_keyword = None
             st.session_state.collection_name = None

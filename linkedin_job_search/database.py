@@ -63,6 +63,6 @@ def load_data_from_chroma(
         },
     )["documents"]
 
-    logger.info(f"Retrieved {len(retrieved_documents)} documents.")
+    logger.info(f"Retrieved {len(retrieved_documents[0])} documents.")
 
     return retrieved_documents
