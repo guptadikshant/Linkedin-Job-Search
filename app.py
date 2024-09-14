@@ -35,7 +35,7 @@ logging.basicConfig(
 
 def main():
     logger.info("Started the server.")
-    st.title("Candidate Search on Linkedin")
+    st.title("AI Based Candidate Search on Linkedin")
 
     # Initialize session state if not already set
     if "collection_name" not in st.session_state:
