@@ -22,12 +22,12 @@ Use the **.env.template** file to generate the same .env file
 ```cmd
 streamlit run app.py
 ```
-6) A server with localhost will open in the browser like below
+### A server with localhost will open in the browser like below
 
 ![Home Page](docs/home_page.png)
 
-Enter the job title first as it first needs to save the data about that particular job title. Once the data is saved we can supply the job description and we will get the job profiles like below
+### Enter the job title first as it first needs to save the data about that particular job title. Once the data is saved we can supply the job description and we will get the job profiles like below
 ![Job Title](docs/job_title.png)
 
-Output:
+### Output:
 ![Output](docs/final_response.png)
