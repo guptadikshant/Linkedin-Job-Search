@@ -1,0 +1,35 @@
+[project]
+name = "linkedin_job_search_agent_agent"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "Dikshant Gupta",email = "guptadikshant99@gmail.com"}
+]
+readme = "README.md"
+requires-python = ">=3.11, <4"
+dependencies = [
+    "openai",
+    "streamlit",
+    "chromadb",
+    "langchain",
+    "langchain-community",
+    "langchain-openai",
+    "langchain-google-genai",
+    "langchain-groq",
+    "python-dotenv",
+    "jupyter",
+    "ipykernel",
+    "linkedin-api",
+    "langchain_chroma"
+]
+
+[tool.poetry]
+name = "linkedin_job_search_agent_agent"
+version = "0.0.1"
+packages = [
+    {include = "linkedin_job_search_agent_agent"},
+]
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"

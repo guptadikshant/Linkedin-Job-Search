@@ -1,7 +1,6 @@
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts.chat import ChatPromptTemplate
-
-from linkedin_job_search.templates import (
+from linkedin_job_search_agent.templates import (
     EXTRACT_KEYWORDS_PROMT_TEMPLATE,
     GET_CANDIDATES_PROMT_TEMPLATE,
 )
