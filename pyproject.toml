@@ -20,7 +20,9 @@ dependencies = [
     "jupyter",
     "ipykernel",
     "linkedin-api",
-    "langchain_chroma"
+    "langchain_chroma",
+    "qdrant-client (<1.13.2)",
+    "sentence-transformers (>=3.4.1,<4.0.0)"
 ]
 
 [tool.poetry]
