@@ -26,19 +26,28 @@ class QdrantVectorStore:
     This class provides methods to create a collection, load data into Qdrant,
     """
 
-    def __init__(self, collection_name: str) -> None:
+    def __init__(self, collection_name: str, embedding_model_type: str, embedding_model_id: str) -> None:
         """
         Initialize the QdrantVectorStore with the collection name.
         This method sets up the Qdrant client with the provided URL and API key.
         Args:
             collection_name (str): Name of the collection to be created or used in Qdrant
         """
-        self.client = QdrantClient(
+        self.client: QdrantClient = QdrantClient(
             url=env_settings.QDRANT_HOST_URL, api_key=env_settings.QDRANT_API_KEY
         )
-        self.collection_name = collection_name
-        self.qdrant_url = os.getenv("QDRANT_HOST_URL")
-        self.qdrant_api_key = os.getenv("QDRANT_API_KEY")
+        self.collection_name: str = collection_name
+        self.qdrant_url: str = os.getenv("QDRANT_HOST_URL")
+        self.qdrant_api_key: str = os.getenv("QDRANT_API_KEY")
+        self.searched_job_title: str = ""
+
+        # loading embedding model
+        if embedding_model_type == "gemini":
+            self.doc_store = VectorEmbeddings(model_id=embedding_model_id)
+        elif embedding_model_type == "sentence_transformers":
+            self.doc_store = VectorEmbeddings(model_id=embedding_model_id)
+        else:
+            raise ValueError("Unsupported embedding model.")
 
     def _setup_qdrant_client(self) -> QdrantClient:
         """
@@ -116,12 +125,18 @@ class QdrantVectorStore:
             Filter: Filter condition for Qdrant
         """
         try:
+            # one of the skills should be present in the profile
             should_conditions = [
-                FieldCondition(keyd=keyword, match=models.MatchValue(value=keyword))
+                FieldCondition(key=keyword, match=models.MatchValue(value=keyword))
                 for keyword in relevant_keywords
                 if keyword
             ]
-            return Filter(should=should_conditions)
+            # search only for the that job title to narrow down the search
+            must_conditions = [
+                FieldCondition(key="job_title", match=models.MatchValue(value=self.searched_job_title))
+            ]
+
+            return Filter(should=should_conditions,must=must_conditions)
         except Exception as e:
             logger.error(f"Failed to create filter condition: {e}")
             return None
@@ -194,14 +209,6 @@ class QdrantVectorStore:
         try:
             logger.info("Loading data into Qdrant.")
 
-            # loading embedding model
-            if embedding_model_type == "gemini":
-                self.doc_store = VectorEmbeddings(model_id=embedding_model_id)
-            elif embedding_model_type == "sentence_transformers":
-                self.doc_store = VectorEmbeddings(model_id=embedding_model_id)
-            else:
-                raise ValueError("Unsupported embedding model.")
-
             # Check if the collection exists
             self._setup_qdrant_client()
 
@@ -217,9 +224,11 @@ class QdrantVectorStore:
             logger.error(f"Value error: {v}")
 
     def load_data_from_qdrant(
+        self,
         job_description: str,
         relevant_keywords: List[str],
         limit: int,
+        searched_job_title: str,
     ) -> List[str]:
         """
         Retrieve relevant documents from Qdrant Cloud based on job description and keywords.
@@ -234,44 +243,19 @@ class QdrantVectorStore:
         Returns:
             List[str]: List of retrieved documents
         """
-        # # setting up Qdrant client
-        # qdrant_url = os.getenv("QDRANT_HOST_URL")
-        # qdrant_api_key = os.getenv("QDRANT_API_KEY")
-        # logger.info("Retrieving relevant documents from Qdrant")
-        # client = QdrantClient(url=qdrant_url, api_key=qdrant_api_key)
+        try:
+            logger.info("Loading data from Qdrant.")
+            self.searched_job_title = searched_job_title
+            self._setup_qdrant_client()
 
-        # # Generate embedding for the job description
-        # query_vector = get_embedding(job_description)
+            relevant_profiles = self.find_similar_profiles(
+                query_vector=self.doc_store.get_embedding(job_description),
+                relevant_keywords=relevant_keywords,
+                limit=limit,
+            )
 
-        # # Build the keyword filter for Qdrant
-        # keyword_conditions = []
-        # for keyword in relevant_keywords:
-        #     if keyword:  # Ensure keyword is not empty
-        #         keyword_conditions.append(
-        #             models.FieldCondition(
-        #                 key=keyword, match=models.MatchValue(value=keyword)
-        #             )
-        #         )
+            return relevant_profiles
 
-        # filter_condition = None
-        # if keyword_conditions:
-        #     filter_condition = models.Filter(
-        #         should=keyword_conditions  # Equivalent to $or in MongoDB/ChromaDB
-        #     )
-
-        # # Search for similar documents with filter
-        # search_results = client.search(
-        #     collection_name=collection_name,
-        #     query_vector=query_vector,
-        #     limit=limit,
-        #     filter=filter_condition,
-        # )
-
-        # # Extract documents from results
-        # retrieved_documents = [result.payload["document"] for result in search_results]
-
-        # logger.info(f"Retrieved {len(retrieved_documents)} documents.")
-
-        # return [retrieved_documents]
-
-        # return [retrieved_documents]
+        except UnexpectedResponse as e:
+            logger.error(f"Failed to load data from Qdrant: {e}")
+            return []

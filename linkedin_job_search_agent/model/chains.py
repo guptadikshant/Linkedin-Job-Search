@@ -1,3 +1,4 @@
+import logging
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts.chat import ChatPromptTemplate
 from .templates import (
@@ -5,8 +6,10 @@ from .templates import (
     GET_CANDIDATES_PROMT_TEMPLATE,
 )
 
+logger = logging.getLogger()
 
-def extract_relevant_keywords(llm_model, job_description: str, logger) -> list:
+
+def extract_relevant_keywords(llm_model, job_description: str) -> list:
     """
     Extracts relevant keywords from a job description using an LLM model.
     This function processes a job description to identify and extract key terms that are relevant 

@@ -40,7 +40,7 @@ def get_profile_data(job_title: str) -> dict:
 
         # Structure data for database
         structured_data = structure_data_for_database(
-            peoples_profiles=all_peoples_profiles
+            peoples_profiles=all_peoples_profiles, job_title=job_title
         )
         logger.info(f"Fetched: {len(structured_data)} profiles")
 

@@ -13,11 +13,12 @@ logger = logging.getLogger()
 
 def etl_main():
     try:
+        job_title = input("Enter the job title to search for: ")
         # Load configuration
         start_time = time.perf_counter()
         config = load_yaml("linkedin_job_search_agent\config.yml")
         # get all the profiles data
-        profile_data = get_profile_data(job_title="Software Engineer")
+        profile_data = get_profile_data(job_title=job_title)
         # intialize the vector store
         vector_store = QdrantVectorStore(
             collection_name=config["configurations"]["vector_database_config"]["collection_name"],
@@ -25,8 +26,8 @@ def etl_main():
         # load the data into qdrant
         vector_store.load_data_into_qdrant(
             all_documents=profile_data,
-            vector_size=config["configurations"]["embdding_model_config"]["gemini_embedding_model"]["dimension"],
-            embedding_model_id=config["configurations"]["embdding_model_config"]["gemini_embedding_model"]["model_id"],
+            vector_size=config["configurations"]["embedding_model_config"]["gemini_embedding_model"]["dimension"],
+            embedding_model_id=config["configurations"]["embedding_model_config"]["gemini_embedding_model"]["model_id"],
             embedding_model_type="gemini",
         )
         end_time = time.perf_counter()

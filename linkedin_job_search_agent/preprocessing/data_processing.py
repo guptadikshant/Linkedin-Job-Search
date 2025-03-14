@@ -139,7 +139,17 @@ def data_cleanup(peoples_profiles: pd.DataFrame):
         logger.error(f"Error occurred in cleaning up the data. Error: {err}")
 
 
-def structure_data_for_database(peoples_profiles: pd.DataFrame):
+def structure_data_for_database(peoples_profiles: pd.DataFrame, job_title: str) -> dict:
+    """
+    Function to structure the data for loading into the database.
+    This function takes the people's profiles and job title as input and returns a list of documents.
+    Args:
+        peoples_profiles (pd.DataFrame): linkedin profiles data
+        job_title (str): job title to search for
+
+    Returns:
+        dict: structured data containing LinkedIn profiles and their skills
+    """
     try:
         logger.info("Structuring Data for loading data into database.")
         peoples_profiles = data_cleanup(peoples_profiles)
@@ -160,6 +170,7 @@ def structure_data_for_database(peoples_profiles: pd.DataFrame):
                     if "name" in skill_name:
                         metadatas.update({skill_name["name"]: skill_name["name"]})
 
+            metadatas.update({"job_title": job_title})
             all_documents.append(
                 Document(
                     page_content=json.dumps(documents_without_skills),
