@@ -1,11 +1,13 @@
 import json
 from collections import defaultdict
-
+import logging
 import pandas as pd
+from uuid import uuid4
 from langchain_core.documents import Document
 
+logger = logging.getLogger()
 
-def create_people_profiles_skills(api, all_peoples_df: pd.DataFrame, logger):
+def create_people_profiles_skills(api, all_peoples_df: pd.DataFrame):
     try:
         logger.info("Getting people's profile and skills.")
         people_urn_ids = []
@@ -32,7 +34,7 @@ def create_people_profiles_skills(api, all_peoples_df: pd.DataFrame, logger):
         )
 
 
-def data_cleanup(peoples_profiles: pd.DataFrame, logger):
+def data_cleanup(peoples_profiles: pd.DataFrame):
     try:
         logger.info("Started cleaning up the data.")
         # code to clean up unnecessary details
@@ -137,14 +139,14 @@ def data_cleanup(peoples_profiles: pd.DataFrame, logger):
         logger.error(f"Error occurred in cleaning up the data. Error: {err}")
 
 
-def structure_data_for_database(peoples_profiles: pd.DataFrame, logger):
+def structure_data_for_database(peoples_profiles: pd.DataFrame):
     try:
         logger.info("Structuring Data for loading data into database.")
-        peoples_profiles = data_cleanup(peoples_profiles, logger)
+        peoples_profiles = data_cleanup(peoples_profiles)
 
         metadatas = []
         all_documents = []
-        for urn_id, profile_info in peoples_profiles.items():
+        for _, profile_info in peoples_profiles.items():
             for info in profile_info:
                 metadatas = {}
                 documents_without_skills = {
@@ -162,7 +164,7 @@ def structure_data_for_database(peoples_profiles: pd.DataFrame, logger):
                 Document(
                     page_content=json.dumps(documents_without_skills),
                     metadata=metadatas,
-                    id=urn_id,
+                    id=uuid4(),
                 )
             )
 

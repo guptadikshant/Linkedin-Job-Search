@@ -1,12 +1,25 @@
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts.chat import ChatPromptTemplate
-from linkedin_job_search_agent.templates import (
+from .templates import (
     EXTRACT_KEYWORDS_PROMT_TEMPLATE,
     GET_CANDIDATES_PROMT_TEMPLATE,
 )
 
 
 def extract_relevant_keywords(llm_model, job_description: str, logger) -> list:
+    """
+    Extracts relevant keywords from a job description using an LLM model.
+    This function processes a job description to identify and extract key terms that are relevant 
+    for job matching or search purposes.
+    Parameters:
+        llm_model: The language model to use for keyword extraction
+        job_description (str): The job description text to analyze
+        logger: A logger instance for logging the extraction process
+    Returns:
+        list: A list of extracted keywords from the job description
+    Example:
+        keywords = extract_relevant_keywords(llm_model, job_description, logger)
+    """
     logger.info("Extracting relevant keywords from job description.")
     prompt = ChatPromptTemplate.from_template(EXTRACT_KEYWORDS_PROMT_TEMPLATE)
 
