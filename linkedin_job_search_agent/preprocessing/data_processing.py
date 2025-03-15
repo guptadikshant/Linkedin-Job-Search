@@ -7,6 +7,7 @@ from langchain_core.documents import Document
 
 logger = logging.getLogger()
 
+
 def create_people_profiles_skills(api, all_peoples_df: pd.DataFrame):
     try:
         logger.info("Getting people's profile and skills.")
@@ -152,6 +153,7 @@ def structure_data_for_database(peoples_profiles: pd.DataFrame, job_title: str) 
     """
     try:
         logger.info("Structuring Data for loading data into database.")
+        job_title = job_title.lower().replace(" ", "_")
         peoples_profiles = data_cleanup(peoples_profiles)
 
         metadatas = []
@@ -166,9 +168,11 @@ def structure_data_for_database(peoples_profiles: pd.DataFrame, job_title: str) 
                     for k1, v1 in v.items()
                     if k1 != "skills"
                 }
+                skills = []
                 for skill_name in info["skills"]:
                     if "name" in skill_name:
-                        metadatas.update({skill_name["name"]: skill_name["name"]})
+                        skills.append(skill_name["name"])
+                metadatas.update({"skills": skills})
 
             metadatas.update({"job_title": job_title})
             all_documents.append(

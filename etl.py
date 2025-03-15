@@ -22,13 +22,13 @@ def etl_main():
         # intialize the vector store
         vector_store = QdrantVectorStore(
             collection_name=config["configurations"]["vector_database_config"]["collection_name"],
+            embedding_model_id=config["configurations"]["embedding_model_config"]["gemini_embedding_model"]["model_id"],
+            embedding_model_type="gemini",
         )
         # load the data into qdrant
         vector_store.load_data_into_qdrant(
             all_documents=profile_data,
-            vector_size=config["configurations"]["embedding_model_config"]["gemini_embedding_model"]["dimension"],
-            embedding_model_id=config["configurations"]["embedding_model_config"]["gemini_embedding_model"]["model_id"],
-            embedding_model_type="gemini",
+            vector_size=config["configurations"]["embedding_model_config"]["gemini_embedding_model"]["dimension"]
         )
         end_time = time.perf_counter()
         elapsed_time = end_time - start_time

@@ -3,7 +3,7 @@ import logging
 import streamlit as st
 from dotenv import find_dotenv, load_dotenv
 from linkedin_job_search_agent.db.vector_store import QdrantVectorStore
-from linkedin_job_search_agent.model.chains import extract_relevant_keywords
+from linkedin_job_search_agent.model.chains import extract_relevant_keywords, get_relevant_candiates_profiles
 from linkedin_job_search_agent.utils import load_yaml
 from linkedin_job_search_agent.model.models import LLMModel
 
@@ -73,12 +73,14 @@ def main():
                     searched_job_title=job_title,
                 )
 
-                if relevant_profiles:
-                    st.write("Relevant Profiles:")
-                    for profile in relevant_profiles:
-                        st.write(profile)
-                else:
-                    st.write("No relevant profiles found.")
+                job_profiles = get_relevant_candiates_profiles(
+                    relevant_docs=relevant_profiles,
+                    job_description=job_description,
+                    llm_model=llm_model,
+                )
+
+                st.write("Relevant Job Profiles:")
+                st.write(job_profiles)
 
 
 if __name__ == "__main__":

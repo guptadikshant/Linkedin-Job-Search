@@ -7,10 +7,11 @@ from qdrant_client.http import models
 from qdrant_client.http.exceptions import UnexpectedResponse
 from qdrant_client.http.models import Distance, PointStruct, VectorParams
 from qdrant_client.models import FieldCondition, Filter
+from tqdm import tqdm
 
 from linkedin_job_search_agent.settings import env_settings
 
-from .embeddings import VectorEmbeddings
+from linkedin_job_search_agent.db.embeddings import VectorEmbeddings
 
 logger = logging.getLogger()
 
@@ -33,6 +34,7 @@ class QdrantVectorStore:
         Args:
             collection_name (str): Name of the collection to be created or used in Qdrant
         """
+        
         self.client: QdrantClient = QdrantClient(
             url=env_settings.QDRANT_HOST_URL, api_key=env_settings.QDRANT_API_KEY
         )
@@ -127,7 +129,7 @@ class QdrantVectorStore:
         try:
             # one of the skills should be present in the profile
             should_conditions = [
-                FieldCondition(key=keyword, match=models.MatchValue(value=keyword))
+                FieldCondition(key="skills", match=models.MatchValue(value=keyword))
                 for keyword in relevant_keywords
                 if keyword
             ]
@@ -180,7 +182,7 @@ class QdrantVectorStore:
                     vector=self.doc_store.get_embedding(doc.page_content),
                     payload=doc.metadata,
                 )
-                for doc in documents
+                for doc in tqdm(documents)
             ]
             client = self._setup_qdrant_client()
             client.upsert(
@@ -196,8 +198,6 @@ class QdrantVectorStore:
         self,
         all_documents: List,
         vector_size: int,
-        embedding_model_id: str,
-        embedding_model_type: str,
     ) -> None:
         """
         Load data into Qdrant collection.
@@ -245,7 +245,7 @@ class QdrantVectorStore:
         """
         try:
             logger.info("Loading data from Qdrant.")
-            self.searched_job_title = searched_job_title
+            self.searched_job_title = searched_job_title.lower().replace(" ", "_")
             self._setup_qdrant_client()
 
             relevant_profiles = self.find_similar_profiles(

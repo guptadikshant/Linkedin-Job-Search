@@ -38,7 +38,7 @@ def extract_relevant_keywords(llm_model, job_description: str) -> list:
 
 
 def get_relevant_candiates_profiles(
-    relevant_docs: list[str], job_description: str, llm_model, logger
+    relevant_docs: list[str], job_description: str, llm_model
 ) -> str:
     logger.info("Searching relevant candidates profiles.")
     job_search_prompt = ChatPromptTemplate.from_messages(GET_CANDIDATES_PROMT_TEMPLATE)
