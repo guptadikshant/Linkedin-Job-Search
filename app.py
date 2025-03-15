@@ -73,14 +73,19 @@ def main():
                     searched_job_title=job_title,
                 )
 
-                job_profiles = get_relevant_candiates_profiles(
+                # job_profiles = get_relevant_candiates_profiles(
+                #     relevant_docs=relevant_profiles,
+                #     job_description=job_description,
+                #     llm_model=llm_model,
+                # )
+                
+                st.write_stream(
+                    get_relevant_candiates_profiles(
                     relevant_docs=relevant_profiles,
                     job_description=job_description,
                     llm_model=llm_model,
                 )
-
-                st.write("Relevant Job Profiles:")
-                st.write(job_profiles)
+                )
 
 
 if __name__ == "__main__":

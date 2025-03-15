@@ -26,10 +26,17 @@ GET_CANDIDATES_PROMT_TEMPLATE = [
             candidate which is most suitable for the job.\
             
             ###
-            The output should contain the candidate name, his years of experience, his job skills and his linkedin profile url, his present company (NO PREAMBLE)
+            The output should contain should contains below:
+            1) The candidate name
+            2) Years of experience
+            3) Job skills
+            4) Linkedin profile url, 
+            5) Name of the present company 
+            
+            (NO PREAMBLE)
             ###
             
-            ***YOUR ANASWER SHOULD COMES FROM THE GIVEN JOB PROFILES ONLY AND NOTHING ELSE.***
+            *** YOUR ANSWER SHOULD COMES ONLY FROM THE GIVEN JOB PROFILES AND NOTHING ELSE. ***
             """,
     ),
     (

@@ -48,6 +48,6 @@ def get_relevant_candiates_profiles(
 
     logger.info("Successfully retrieved relevant job profiles.")
 
-    return chain.invoke(
+    return chain.stream(
         {"candidate_profiles": relevant_docs, "job_description": job_description}
     )
