@@ -180,7 +180,11 @@ class QdrantVectorStore:
                 PointStruct(
                     id=doc.id,
                     vector=self.doc_store.get_embedding(doc.page_content),
-                    payload=doc.metadata,
+                    payload={
+                        "profile_details": doc.page_content,
+                        "skills": doc.metadata["skills"],
+                        "job_title": doc.metadata["job_title"],
+                    },
                 )
                 for doc in tqdm(documents)
             ]

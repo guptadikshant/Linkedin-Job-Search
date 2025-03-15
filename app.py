@@ -50,9 +50,9 @@ def main():
         config_data = load_config()
         with st.spinner("Getting Relevant Job Profiles"):
             if config_data:
-                llm_model = LLMModel().get_groq_model(
-                    model_name=config_data["configurations"]["llm_model_config"]["groq_model"]["model_id"],
-                    temperature=config_data["configurations"]["llm_model_config"]["groq_model"]["temperature"]
+                llm_model = LLMModel().get_gemini_model(
+                    model_name=config_data["configurations"]["llm_model_config"]["gemini_model"]["model_id"],
+                    temperature=config_data["configurations"]["llm_model_config"]["gemini_model"]["temperature"]
                 )
 
                 relevant_job_keywords = extract_relevant_keywords(
