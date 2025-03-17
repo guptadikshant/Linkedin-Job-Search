@@ -13,6 +13,7 @@ class VectorEmbeddings:
     """
 
     def __init__(self, model_id: str) -> None:
+        gemini_client.configure(api_key=os.getenv("GEMINI_API_KEY"))
         self.model_id = model_id
         # Initialize sentence transformer model if needed
         # if not model_id.startswith("models/"):
@@ -39,7 +40,6 @@ class VectorEmbeddings:
         Generate embeddings using Gemini API.
         """
         try:
-            gemini_client.configure(api_key=os.getenv("GEMINI_API_KEY"))
             response = embed_content(content=text, model=self.model_id)
             return response["embedding"]
 

@@ -1,12 +1,10 @@
-import logging
+from loguru import logger
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.prompts.chat import ChatPromptTemplate
 from .templates import (
     EXTRACT_KEYWORDS_PROMT_TEMPLATE,
     GET_CANDIDATES_PROMT_TEMPLATE,
 )
-
-logger = logging.getLogger()
 
 
 def extract_relevant_keywords(llm_model, job_description: str) -> list:

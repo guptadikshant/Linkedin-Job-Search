@@ -1,7 +1,5 @@
 import yaml
-import logging
-
-logger = logging.getLogger()
+from loguru import logger
 
 def load_yaml(file_path: str) -> dict:
     """Load a YAML file and return its content as a dictionary."""

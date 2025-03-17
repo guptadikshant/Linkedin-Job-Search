@@ -1,5 +1,5 @@
 configurations:
-  number_of_job_profiles: 50
+  number_of_job_profiles: 25
   vector_database_config:
     collection_name: "linkedin_job_profiles"
     database_type: "qdrant"

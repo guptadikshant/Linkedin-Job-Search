@@ -1,4 +1,4 @@
-import logging
+from loguru import logger
 import os
 from linkedin_api import Linkedin
 import pandas as pd
@@ -6,8 +6,6 @@ from linkedin_job_search_agent.preprocessing.data_processing import (
     create_people_profiles_skills,
     structure_data_for_database,
 )
-
-logger = logging.getLogger()
 
 
 def get_profile_data(job_title: str, limit: int) -> dict:

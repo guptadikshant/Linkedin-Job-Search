@@ -1,9 +1,7 @@
 import os
-import logging
+from loguru import logger
 from langchain_google_genai.chat_models import ChatGoogleGenerativeAI
 from langchain_groq.chat_models import ChatGroq
-
-logger = logging.getLogger()
 
 class LLMModel:
     def __init__(self) -> None:

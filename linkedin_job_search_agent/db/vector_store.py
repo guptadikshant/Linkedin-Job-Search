@@ -1,4 +1,6 @@
+import loguru
 import logging
+from loguru import logger
 import os
 from typing import List
 
@@ -13,12 +15,10 @@ from linkedin_job_search_agent.settings import env_settings
 
 from linkedin_job_search_agent.db.embeddings import VectorEmbeddings
 
-logger = logging.getLogger()
 
 # Set higher log level for qdrant_client to suppress its logs
-logging.getLogger("qdrant_client").setLevel(logging.ERROR)
-# Also silence related HTTP libraries
-logging.getLogger("httpx").setLevel(logging.ERROR)
+loguru.logger.configure(handlers=[{"sink": lambda _: None, "level": logging.ERROR, "filter": "qdrant_client"}])
+loguru.logger.configure(handlers=[{"sink": lambda _: None, "level": logging.ERROR, "filter": "httpx"}])
 
 
 class QdrantVectorStore:
@@ -172,11 +172,35 @@ class QdrantVectorStore:
                 )
                 for doc in tqdm(documents)
             ]
-            self.client.upsert(
-                collection_name=self.collection_name,
-                points=doc_points,
-                wait=True,
-            )
+
+            # Insert in batches of 100 documents
+            batch_size = 100
+            for i in range(0, len(doc_points), batch_size):
+                batch = doc_points[i:i+batch_size]
+                self.client.upsert(
+                    collection_name=self.collection_name,
+                    points=batch,
+                    wait=False,  # Use async operation
+                )
+
+            # for doc in tqdm(documents):
+            #     # Create PointStruct for each document
+            #     point = PointStruct(
+            #         id=doc.id,
+            #         vector=self.doc_store.get_embedding(doc.page_content),
+            #         payload={
+            #             "profile_details": doc.page_content,
+            #             "skills": doc.metadata["skills"],
+            #             "job_title": doc.metadata["job_title"],
+            #         },
+            #     )
+            #     # Upsert the point into Qdrant collection
+            #     self.client.upsert(
+            #         collection_name=self.collection_name,
+            #         points=[point],
+            #         wait=True,
+            #     )
+
             logger.info(f"Inserted {len(documents)} documents into Qdrant.")
         except UnexpectedResponse as e:
             logger.error(f"Failed to insert documents: {e}")

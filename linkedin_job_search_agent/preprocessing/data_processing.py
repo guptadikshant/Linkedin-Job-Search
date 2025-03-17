@@ -1,11 +1,11 @@
 import json
 from collections import defaultdict
-import logging
+from loguru import logger
 import pandas as pd
 from uuid import uuid4
 from langchain_core.documents import Document
+from langchain.text_splitter import RecursiveCharacterTextSplitter
 
-logger = logging.getLogger()
 
 
 def create_people_profiles_skills(api, all_peoples_df: pd.DataFrame):
@@ -140,7 +140,7 @@ def data_cleanup(peoples_profiles: pd.DataFrame):
         logger.error(f"Error occurred in cleaning up the data. Error: {err}")
 
 
-def structure_data_for_database(peoples_profiles: pd.DataFrame, job_title: str) -> dict:
+def structure_data_for_database(peoples_profiles: pd.DataFrame, job_title: str) -> list[Document]:
     """
     Function to structure the data for loading into the database.
     This function takes the people's profiles and job title as input and returns a list of documents.
@@ -161,27 +161,38 @@ def structure_data_for_database(peoples_profiles: pd.DataFrame, job_title: str) 
         for _, profile_info in peoples_profiles.items():
             for info in profile_info:
                 metadatas = {}
-                documents_without_skills = {
-                    k1: v1
-                    for k, v in info.items()
-                    if k == "profile_details"
-                    for k1, v1 in v.items()
-                    if k1 != "skills"
-                }
-                skills = []
-                for skill_name in info["skills"]:
-                    if "name" in skill_name:
-                        skills.append(skill_name["name"])
-                metadatas.update({"skills": skills})
+                # Extract profile details excluding skills
+                profile_details = info.get("profile_details", {})
+                documents_without_skills = {k: v for k, v in profile_details.items() if k != "skills"}
+                # Extract skills
+                skills = [skill["name"] for skill in info.get("skills", []) if "name" in skill]
+                metadatas.update({"skills": skills, "job_title": job_title})
 
-            metadatas.update({"job_title": job_title})
-            all_documents.append(
-                Document(
-                    page_content=json.dumps(documents_without_skills),
-                    metadata=metadatas,
-                    id=uuid4(),
-                )
-            )
+                # Serialize JSON to string
+                json_str = json.dumps(documents_without_skills)
+
+                # Split the string into chunks
+                text_splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=0)
+                chunks = text_splitter.split_text(json_str)
+
+                # Create documents from chunks
+                for chunk in chunks:
+                    all_documents.append(
+                        Document(
+                            page_content=chunk,
+                            metadata=metadatas,
+                            id=uuid4(),
+                        )
+                    )
+
+            # metadatas.update({"job_title": job_title})
+            # all_documents.append(
+            #     Document(
+            #         page_content=json.dumps(documents_without_skills),
+            #         metadata=metadatas,
+            #         id=uuid4(),
+            #     )
+            # )
 
         return all_documents
     except Exception as err:
