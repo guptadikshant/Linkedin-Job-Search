@@ -1,12 +1,12 @@
 configurations:
-  number_of_job_profiles: 20
+  number_of_job_profiles: 50
   vector_database_config:
     collection_name: "linkedin_job_profiles"
     database_type: "qdrant"
     index_path: "./qdrant_vector_store"
   embedding_model_config:
     gemini_embedding_model:
-      model_id: "models/embedding-001"
+      model_id: "models/text-embedding-004"
       dimension: 768
     sentence_transformer_embedding_model:
       model_id: "sentence-transformers/all-MiniLM-L6-v2"

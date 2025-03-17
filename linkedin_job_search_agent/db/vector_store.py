@@ -27,14 +27,16 @@ class QdrantVectorStore:
     This class provides methods to create a collection, load data into Qdrant,
     """
 
-    def __init__(self, collection_name: str, embedding_model_type: str, embedding_model_id: str) -> None:
+    def __init__(
+        self, collection_name: str, embedding_model_type: str, embedding_model_id: str
+    ) -> None:
         """
         Initialize the QdrantVectorStore with the collection name.
         This method sets up the Qdrant client with the provided URL and API key.
         Args:
             collection_name (str): Name of the collection to be created or used in Qdrant
         """
-        
+
         self.client: QdrantClient = QdrantClient(
             url=env_settings.QDRANT_HOST_URL, api_key=env_settings.QDRANT_API_KEY
         )
@@ -51,23 +53,6 @@ class QdrantVectorStore:
         else:
             raise ValueError("Unsupported embedding model.")
 
-    def _setup_qdrant_client(self) -> QdrantClient:
-        """
-        Set up the Qdrant client with the provided URL and API key.
-        """
-        try:
-            return QdrantClient(url=self.qdrant_url, api_key=self.qdrant_api_key)
-        except UnexpectedResponse as e:
-            logger.error(f"Failed to connect to Qdrant: {e}")
-
-    def _collection_exists(self) -> bool:
-        """Check if the collection exists."""
-        try:
-            collections = self.client.get_collections().collections
-            return any(col.name == self.collection_name for col in collections)
-        except UnexpectedResponse as e:
-            logger.error(f"Failed to check collection existence: {e}")
-
     def create_collection(self, vector_size: int, distance: str = "Cosine") -> None:
         """
         Create a collection in Qdrant with the specified parameters.
@@ -80,17 +65,14 @@ class QdrantVectorStore:
         try:
             logger.info(f"Creating collection '{self.collection_name}' in Qdrant.")
 
-            # Setting up Qdrant client
-            client = self._setup_qdrant_client()
-
-            if self._collection_exists():
+            if self.client.collection_exists(collection_name=self.collection_name):
                 logger.info(
-                    f"Collection '{self.collection_name}' already exists. Deleting existing collection"
+                    f"Collection '{self.collection_name}' already exists. Returning without creating a new one."
                 )
-                self.delete_collection()
+                return
 
             # Create collection with specified parameters
-            client.create_collection(
+            self.client.create_collection(
                 collection_name=self.collection_name,
                 vectors_config=VectorParams(
                     size=vector_size,
@@ -110,8 +92,7 @@ class QdrantVectorStore:
         """
         try:
             logger.info(f"Deleting collection '{self.collection_name}' from Qdrant.")
-            client = self._setup_qdrant_client()
-            client.delete_collection(collection_name=self.collection_name)
+            self.client.delete_collection(collection_name=self.collection_name)
             logger.info(f"Collection '{self.collection_name}' deleted successfully.")
         except UnexpectedResponse as e:
             logger.error(f"Failed to delete collection: {e}")
@@ -135,10 +116,13 @@ class QdrantVectorStore:
             ]
             # search only for the that job title to narrow down the search
             must_conditions = [
-                FieldCondition(key="job_title", match=models.MatchValue(value=self.searched_job_title))
+                FieldCondition(
+                    key="job_title",
+                    match=models.MatchValue(value=self.searched_job_title),
+                )
             ]
 
-            return Filter(should=should_conditions,must=must_conditions)
+            return Filter(should=should_conditions, must=must_conditions)
         except Exception as e:
             logger.error(f"Failed to create filter condition: {e}")
             return None
@@ -188,8 +172,7 @@ class QdrantVectorStore:
                 )
                 for doc in tqdm(documents)
             ]
-            client = self._setup_qdrant_client()
-            client.upsert(
+            self.client.upsert(
                 collection_name=self.collection_name,
                 points=doc_points,
                 wait=True,
@@ -212,9 +195,6 @@ class QdrantVectorStore:
         """
         try:
             logger.info("Loading data into Qdrant.")
-
-            # Check if the collection exists
-            self._setup_qdrant_client()
 
             # Create collection if it doesn't exist
             self.create_collection(vector_size=vector_size)
@@ -250,7 +230,6 @@ class QdrantVectorStore:
         try:
             logger.info("Loading data from Qdrant.")
             self.searched_job_title = searched_job_title.lower().replace(" ", "_")
-            self._setup_qdrant_client()
 
             relevant_profiles = self.find_similar_profiles(
                 query_vector=self.doc_store.get_embedding(job_description),

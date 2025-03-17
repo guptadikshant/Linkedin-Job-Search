@@ -10,7 +10,7 @@ from linkedin_job_search_agent.preprocessing.data_processing import (
 logger = logging.getLogger()
 
 
-def get_profile_data(job_title: str) -> dict:
+def get_profile_data(job_title: str, limit: int) -> dict:
     """
     Fetches LinkedIn profiles based on the job title and structures the data for database insertion."
     Args:
@@ -28,7 +28,7 @@ def get_profile_data(job_title: str) -> dict:
         # Fetch profiles from LinkedIn
         profiles = linkedin_api.search_people(
             keywords=job_title,
-            limit=10,
+            limit=limit,
         )
 
         all_peoples_df = pd.DataFrame(profiles)
