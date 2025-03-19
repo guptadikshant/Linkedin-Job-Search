@@ -1,21 +1,33 @@
-import logging
-
+from loguru import logger
+import sys
 import streamlit as st
 from dotenv import find_dotenv, load_dotenv
 from linkedin_job_search_agent.db.vector_store import QdrantVectorStore
-from linkedin_job_search_agent.model.chains import extract_relevant_keywords, get_relevant_candiates_profiles
+from linkedin_job_search_agent.model.chains import (
+    extract_relevant_keywords,
+    get_relevant_candiates_profiles,
+)
 from linkedin_job_search_agent.utils import load_yaml
 from linkedin_job_search_agent.model.models import LLMModel
 
 # loading env variables
 load_dotenv(find_dotenv())
 
-logger = logging.getLogger()
-
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s - %(levelname)s -  [%(filename)s::%(lineno)d] - %(message)s",
+# Configure logging
+logger.remove()  # Remove default handler
+logger.add(
+    sys.stderr,
+    level="INFO",
+    format="<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - <level>{message}</level>",
 )
+# for adding logs into a log file
+# logger.add(
+#     "app.log",
+#     rotation="500 MB",
+#     level="INFO",
+#     format="{time:YYYY-MM-DD HH:mm:ss} | {level: <8} | {name}:{function}:{line} - {message}",
+# )
+
 
 @st.cache_data
 def load_config():
@@ -51,8 +63,12 @@ def main():
         with st.spinner("Getting Relevant Job Profiles"):
             if config_data:
                 llm_model = LLMModel().get_gemini_model(
-                    model_name=config_data["configurations"]["llm_model_config"]["gemini_model"]["model_id"],
-                    temperature=config_data["configurations"]["llm_model_config"]["gemini_model"]["temperature"]
+                    model_name=config_data["configurations"]["llm_model_config"][
+                        "gemini_model"
+                    ]["model_id"],
+                    temperature=config_data["configurations"]["llm_model_config"][
+                        "gemini_model"
+                    ]["temperature"],
                 )
 
                 relevant_job_keywords = extract_relevant_keywords(
@@ -60,8 +76,12 @@ def main():
                 )
 
                 vector_store = QdrantVectorStore(
-                    collection_name=config_data["configurations"]["vector_database_config"]["collection_name"],
-                    embedding_model_id=config_data["configurations"]["embedding_model_config"]["gemini_embedding_model"]["model_id"],
+                    collection_name=config_data["configurations"][
+                        "vector_database_config"
+                    ]["collection_name"],
+                    embedding_model_id=config_data["configurations"][
+                        "embedding_model_config"
+                    ]["gemini_embedding_model"]["model_id"],
                     embedding_model_type="gemini",
                 )
 
@@ -73,18 +93,12 @@ def main():
                     searched_job_title=job_title,
                 )
 
-                # job_profiles = get_relevant_candiates_profiles(
-                #     relevant_docs=relevant_profiles,
-                #     job_description=job_description,
-                #     llm_model=llm_model,
-                # )
-                
                 st.write_stream(
                     get_relevant_candiates_profiles(
-                    relevant_docs=relevant_profiles,
-                    job_description=job_description,
-                    llm_model=llm_model,
-                )
+                        relevant_docs=relevant_profiles,
+                        job_description=job_description,
+                        llm_model=llm_model,
+                    )
                 )
 
 
